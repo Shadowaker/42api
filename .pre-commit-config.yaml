@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.5
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: unasync-check
+        name: check _sync is generated from _async
+        entry: uv run python scripts/unasync_generate.py --check
+        language: system
+        pass_filenames: false
+        files: ^src/intra42/_(async|sync)/
+
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        pass_filenames: false
+        types: [python]
