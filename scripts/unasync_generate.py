@@ -23,11 +23,11 @@ ASYNC_DIR = SRC / "_async"
 SYNC_DIR = SRC / "_sync"
 
 GENERATED_HEADER = (
-    '"""GENERATED FILE — DO NOT EDIT BY HAND.\n\n'
-    "Generated from the corresponding module under intra42._async by\n"
-    "scripts/unasync_generate.py (via the `unasync` library). Edit the async\n"
-    "source and re-run that script instead.\n"
-    '"""\n\n'
+    "# GENERATED FILE — DO NOT EDIT BY HAND.\n"
+    "#\n"
+    "# Generated from the corresponding module under intra42._async by\n"
+    "# scripts/unasync_generate.py (via the `unasync` library). Edit the\n"
+    "# async source and re-run that script instead.\n\n"
 )
 
 RULE = unasync.Rule(
@@ -56,7 +56,7 @@ def _find_async_files() -> list[str]:
 
 def _prepend_header(path: Path) -> None:
     text = path.read_text()
-    if not text.startswith('"""GENERATED FILE'):
+    if not text.startswith("# GENERATED FILE"):
         path.write_text(GENERATED_HEADER + text)
 
 
@@ -75,7 +75,7 @@ def check() -> bool:
         rule = unasync.Rule(
             fromdir=str(ASYNC_DIR),
             todir=str(tmp_sync),
-            additional_replacements=RULE.additional_replacements,
+            additional_replacements=RULE.token_replacements,
         )
         unasync.unasync_files(_find_async_files(), [rule])
         for path in tmp_sync.rglob("*.py"):
