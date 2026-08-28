@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import filecmp
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -60,12 +61,41 @@ def _prepend_header(path: Path) -> None:
         path.write_text(GENERATED_HEADER + text)
 
 
+def _fix_up(dir_path: Path) -> None:
+    """Run ruff's import-sort/format fixes on generated output.
+
+    Token replacement (e.g. AsyncIterator -> Iterator) can leave import
+    blocks out of alphabetical order even though the async source was
+    sorted, since the renamed token sorts differently. Re-running ruff here
+    keeps generated output deterministic without hand-fixing this every
+    time a new token rename shuffles an import block.
+
+    `--config` is pinned explicitly: `check()` runs this against a tempdir
+    outside the repo, where ruff's normal upward config discovery wouldn't
+    find pyproject.toml — without it, the tempdir run would silently use
+    ruff's defaults and diverge from `generate()`'s output, causing bogus
+    drift failures.
+    """
+    config = str(ROOT / "pyproject.toml")
+    subprocess.run(
+        ["ruff", "check", "--fix", "--quiet", "--config", config, str(dir_path)],
+        check=True,
+        cwd=ROOT,
+    )
+    subprocess.run(
+        ["ruff", "format", "--quiet", "--config", config, str(dir_path)],
+        check=True,
+        cwd=ROOT,
+    )
+
+
 def generate() -> None:
     unasync.unasync_files(_find_async_files(), [RULE])
     for path in SYNC_DIR.rglob("*.py"):
         if path.name == "__init__.py" and path.stat().st_size == 0:
             continue
         _prepend_header(path)
+    _fix_up(SYNC_DIR)
 
 
 def check() -> bool:
@@ -82,6 +112,7 @@ def check() -> bool:
             if path.name == "__init__.py" and path.stat().st_size == 0:
                 continue
             _prepend_header(path)
+        _fix_up(tmp_sync)
 
         comparison = filecmp.dircmp(str(tmp_sync), str(SYNC_DIR))
         diffs = _collect_diffs(comparison)

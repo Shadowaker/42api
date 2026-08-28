@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from .._pagination import parse_link_header
@@ -25,17 +25,28 @@ ModelT = TypeVar("ModelT", bound=FortyTwoModel)
 
 
 class QuerySet(Generic[ModelT]):
-    def __init__(self, client: Client, path: str, model: type[ModelT]) -> None:
+    def __init__(
+        self,
+        client: Client,
+        path: str,
+        model: type[ModelT],
+        *,
+        bind: Callable[[ModelT], None] | None = None,
+    ) -> None:
         self._client = client
         self._path = path
         self._model = model
+        # Set by the owning resource to attach nested-resource accessors
+        # (e.g. User.events) to each instance as it's parsed. See
+        # AsyncResource._bind_relations / FortyTwoModel._bind_relation.
+        self._bind = bind
         self._filters: dict[str, Any] = {}
         self._sort_fields: list[str] = []
         self._page_size: int | None = None
         self._ranges: dict[str, tuple[Any, Any]] = {}
 
     def _clone(self) -> QuerySet[ModelT]:
-        clone = QuerySet(self._client, self._path, self._model)
+        clone = QuerySet(self._client, self._path, self._model, bind=self._bind)
         clone._filters = dict(self._filters)
         clone._sort_fields = list(self._sort_fields)
         clone._page_size = self._page_size
@@ -78,7 +89,10 @@ class QuerySet(Generic[ModelT]):
         while url is not None:
             response = self._client.request("GET", url, params=params)
             for item in response.json():
-                yield self._model.model_validate(item)
+                instance = self._model.model_validate(item)
+                if self._bind is not None:
+                    self._bind(instance)
+                yield instance
             url = parse_link_header(response.headers.get("Link")).get("next")
             params = None  # the next URL already carries its full query string
 

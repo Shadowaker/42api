@@ -11,12 +11,16 @@ are thin subclasses that just set ``path`` and ``model``. ``.filter()``,
 ``.sort()``, ``.all()`` etc. delegate to :class:`AsyncQuerySet`, and the
 resource itself is iterable (``async for x in client.users``) for the
 unfiltered, unsorted case.
+
+Resources whose model exposes nested sub-resources (e.g. ``User.events``,
+``Campus.users``) override ``_bind_relations()`` to attach lazy accessor
+factories to each freshly parsed instance.
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, cast
 
 from ...models.base import FortyTwoModel
 from ..query import QuerySet
@@ -34,13 +38,28 @@ class Resource(Generic[ModelT]):
     def __init__(self, client: Client) -> None:
         self._client = client
 
+    def _bind_relations(self, instance: ModelT) -> None:
+        """Attach nested-resource accessors to a freshly parsed instance.
+
+        No-op by default. Applied to instances from both ``.get()`` and
+        queryset iteration, so relations work the same either way.
+        """
+        return
+
     def get(self, id: int | str) -> ModelT:
         """Fetch a single resource by id: ``GET {path}/{id}``."""
         response = self._client.request("GET", f"{self.path}/{id}")
-        return self.model.model_validate(response.json())  # type: ignore[return-value]
+        instance = cast(ModelT, self.model.model_validate(response.json()))
+        self._bind_relations(instance)
+        return instance
 
-    def _queryset(self) -> QuerySet[ModelT]:
-        return QuerySet(self._client, self.path, self.model)  # type: ignore[arg-type]
+    def _queryset(self, path: str | None = None) -> QuerySet[ModelT]:
+        return QuerySet(
+            self._client,
+            path or self.path,
+            cast(type[ModelT], self.model),
+            bind=self._bind_relations,
+        )
 
     def filter(self, **kwargs: Any) -> QuerySet[ModelT]:
         return self._queryset().filter(**kwargs)

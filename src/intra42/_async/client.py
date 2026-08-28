@@ -14,6 +14,7 @@ from .._rate_limit import RateLimiter
 from ..exceptions import NetworkError, raise_for_status
 from .resources.campus_users import AsyncCampusUsersResource
 from .resources.campuses import AsyncCampusesResource
+from .resources.events import AsyncEventsResource
 from .resources.users import AsyncUsersResource
 
 
@@ -57,6 +58,7 @@ class AsyncClient:
         self.users = AsyncUsersResource(self)
         self.campuses = AsyncCampusesResource(self)
         self.campus_users = AsyncCampusUsersResource(self)
+        self.events = AsyncEventsResource(self)
 
     @property
     def base_url(self) -> str:

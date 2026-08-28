@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
 from .base import FortyTwoModel
+
+if TYPE_CHECKING:
+    from .._async.query import AsyncQuerySet
+    from .._sync.query import QuerySet
+    from .campus_user import CampusUser
+    from .event import Event
 
 
 class ImageVersions(FortyTwoModel):
@@ -45,3 +52,13 @@ class User(FortyTwoModel):
     alumnized_at: datetime | None = None
     alumni: bool | None = Field(default=None, alias="alumni?")
     active: bool | None = Field(default=None, alias="active?")
+
+    @property
+    def events(self) -> AsyncQuerySet[Event] | QuerySet[Event]:
+        """Events scoped to this user (``GET /users/{id}/events``)"""
+        return self._relation("events")
+
+    @property
+    def campus_users(self) -> AsyncQuerySet[CampusUser] | QuerySet[CampusUser]:
+        """This user's campus memberships (``GET /users/{id}/campus_users``)."""
+        return self._relation("campus_users")
