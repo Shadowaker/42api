@@ -7,14 +7,19 @@
 """Generic resource base class shared by all async resource managers.
 
 Concrete resources (``AsyncUsersResource``, ``AsyncCampusesResource``, ...)
-are thin subclasses that just set ``path`` and ``model``.
+are thin subclasses that just set ``path`` and ``model``. ``.filter()``,
+``.sort()``, ``.all()`` etc. delegate to :class:`AsyncQuerySet`, and the
+resource itself is iterable (``async for x in client.users``) for the
+unfiltered, unsorted case.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Generic, TypeVar
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 
 from ...models.base import FortyTwoModel
+from ..query import QuerySet
 
 if TYPE_CHECKING:
     from ..client import Client
@@ -33,3 +38,27 @@ class Resource(Generic[ModelT]):
         """Fetch a single resource by id: ``GET {path}/{id}``."""
         response = self._client.request("GET", f"{self.path}/{id}")
         return self.model.model_validate(response.json())  # type: ignore[return-value]
+
+    def _queryset(self) -> QuerySet[ModelT]:
+        return QuerySet(self._client, self.path, self.model)  # type: ignore[arg-type]
+
+    def filter(self, **kwargs: Any) -> QuerySet[ModelT]:
+        return self._queryset().filter(**kwargs)
+
+    def sort(self, *fields: str) -> QuerySet[ModelT]:
+        return self._queryset().sort(*fields)
+
+    def page_size(self, n: int) -> QuerySet[ModelT]:
+        return self._queryset().page_size(n)
+
+    def range(self, field: str, start: Any, end: Any) -> QuerySet[ModelT]:
+        return self._queryset().range(field, start, end)
+
+    def all(self) -> list[ModelT]:
+        return self._queryset().all()
+
+    def first(self) -> ModelT | None:
+        return self._queryset().first()
+
+    def __iter__(self) -> Iterator[ModelT]:
+        return self._queryset().__iter__()
