@@ -19,7 +19,6 @@ class Image(FortyTwoModel):
     versions: ImageVersions | None = None
 
 
-
 class User(FortyTwoModel):
     id: int
     email: str | None = None

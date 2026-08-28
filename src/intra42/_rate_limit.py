@@ -28,7 +28,7 @@ class RateLimiter:
         monotonic: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
-    
+
         self._rate = rate
         self._capacity = float(burst)
         self._hourly_quota = hourly_quota
@@ -79,7 +79,6 @@ class RateLimiter:
         self._refill(now)
         self._tokens = max(0.0, self._tokens - 1.0)
         self._hour_count += 1
-
 
     # No lock needed: monotonically extending a float is safe to race,
     # and only ever makes the next acquire() wait *more*, never less.

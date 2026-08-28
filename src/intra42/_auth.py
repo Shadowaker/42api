@@ -18,7 +18,7 @@ from .exceptions import AuthenticationError
 
 TOKEN_URL = "https://api.intra.42.fr/oauth/token"
 
-DEFAULT_LEEWAY = 60.0   # Refresh before expire
+DEFAULT_LEEWAY = 60.0  # Refresh before expire
 
 
 class TokenManager:
@@ -29,7 +29,7 @@ class TokenManager:
         *,
         token_url: str = TOKEN_URL,
         leeway: float = DEFAULT_LEEWAY,
-    ) -> None:    
+    ) -> None:
         self._client_id = client_id
         self._client_secret = client_secret
         self._token_url = token_url

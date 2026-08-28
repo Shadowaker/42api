@@ -16,7 +16,7 @@ class FortyTwoAPIError(Exception):
         message: str,
         *,
         status_code: int | None = None,
-        response: "httpx.Response | None" = None,
+        response: httpx.Response | None = None,
     ) -> None:
         super().__init__(message)
         self.message = message
@@ -64,7 +64,7 @@ _STATUS_MAP: dict[int, type[FortyTwoAPIError]] = {
 }
 
 
-def raise_for_status(response: "httpx.Response") -> None:
+def raise_for_status(response: httpx.Response) -> None:
     """Raise the mapped :class:`FortyTwoAPIError` subclass for a non-2xx response.
 
     Does nothing for successful responses.

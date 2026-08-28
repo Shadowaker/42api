@@ -26,7 +26,6 @@ def build_query_params(
     page_number: int | None = None,
     ranges: Mapping[str, tuple[Any, Any]] | None = None,
 ) -> dict[str, str]:
-
     """Assemble a flat ``{param_name: value}`` dict ready to pass to httpx.
 
     - ``filters={"campus_id": 1}`` -> ``{"filter[campus_id]": "1"}``

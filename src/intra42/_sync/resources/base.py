@@ -26,7 +26,7 @@ class Resource(Generic[ModelT]):
     path: ClassVar[str]
     model: ClassVar[type[FortyTwoModel]]
 
-    def __init__(self, client: "Client") -> None:
+    def __init__(self, client: Client) -> None:
         self._client = client
 
     def get(self, id: int | str) -> ModelT:

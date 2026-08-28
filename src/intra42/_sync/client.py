@@ -15,9 +15,10 @@ from typing import Any
 import httpx
 
 from .._auth import TokenManager
-from .._config import ClientConfig, DEFAULT_BASE_URL
+from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
 from ..exceptions import NetworkError, raise_for_status
+from .resources.campuses import CampusesResource
 from .resources.users import UsersResource
 
 
@@ -59,6 +60,7 @@ class Client:
         )
 
         self.users = UsersResource(self)
+        self.campuses = CampusesResource(self)
 
     @property
     def base_url(self) -> str:
@@ -117,7 +119,7 @@ class Client:
     def close(self) -> None:
         self._http.close()
 
-    def __enter__(self) -> "Client":
+    def __enter__(self) -> Client:
         return self
 
     def __exit__(self, *exc_info: object) -> None:

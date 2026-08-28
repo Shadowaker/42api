@@ -1,7 +1,7 @@
 """Pure helper for parsing RFC 5988 ``Link`` headers.
 
 42's API paginates list endpoints and advertises the next/first/last/prev
-page URLs via a standard ``Link`` header: 
+page URLs via a standard ``Link`` header:
     <https://api.intra.42.fr/v2/users?page=2>; rel="next",
     <https://api.intra.42.fr/v2/users?page=42>; rel="last"
 """

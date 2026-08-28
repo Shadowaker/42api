@@ -9,9 +9,10 @@ from typing import Any
 import httpx
 
 from .._auth import TokenManager
-from .._config import ClientConfig, DEFAULT_BASE_URL
+from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
 from ..exceptions import NetworkError, raise_for_status
+from .resources.campuses import AsyncCampusesResource
 from .resources.users import AsyncUsersResource
 
 
@@ -53,6 +54,7 @@ class AsyncClient:
         )
 
         self.users = AsyncUsersResource(self)
+        self.campuses = AsyncCampusesResource(self)
 
     @property
     def base_url(self) -> str:
@@ -111,7 +113,7 @@ class AsyncClient:
     async def aclose(self) -> None:
         await self._http.aclose()
 
-    async def __aenter__(self) -> "AsyncClient":
+    async def __aenter__(self) -> AsyncClient:
         return self
 
     async def __aexit__(self, *exc_info: object) -> None:

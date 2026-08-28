@@ -3,7 +3,7 @@
 
 Usage:
     uv run python scripts/unasync_generate.py            # regenerate in place
-    uv run python scripts/unasync_generate.py --check    # fail if regenerating would change anything
+    uv run python scripts/unasync_generate.py --check    # fail if regen would differ
 """
 
 from __future__ import annotations
