@@ -5,7 +5,6 @@ from datetime import datetime
 from pydantic import Field
 
 from .base import FortyTwoModel
-from .campus import Campus
 
 
 class ImageVersions(FortyTwoModel):
