@@ -5,5 +5,5 @@ from .base import AsyncResource
 
 
 class AsyncCampusesResource(AsyncResource[Campus]):
-    path = "/campuses"
+    path = "/campus"
     model = Campus

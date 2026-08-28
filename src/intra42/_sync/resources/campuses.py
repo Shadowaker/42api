@@ -11,5 +11,5 @@ from .base import Resource
 
 
 class CampusesResource(Resource[Campus]):
-    path = "/campuses"
+    path = "/campus"
     model = Campus

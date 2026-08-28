@@ -6,7 +6,7 @@ from intra42._sync.client import Client
 
 async def test_get_campus_async(mock_token_route) -> None:
     mock, _ = mock_token_route
-    mock.get("https://api.intra.42.fr/v2/campuses/1").mock(
+    mock.get("https://api.intra.42.fr/v2/campus/1").mock(
         return_value=httpx.Response(200, json={"id": 1, "name": "Paris"})
     )
 
@@ -22,7 +22,7 @@ async def test_get_campus_async(mock_token_route) -> None:
 
 def test_get_campus_sync(mock_token_route) -> None:
     mock, _ = mock_token_route
-    mock.get("https://api.intra.42.fr/v2/campuses/1").mock(
+    mock.get("https://api.intra.42.fr/v2/campus/1").mock(
         return_value=httpx.Response(200, json={"id": 1, "name": "Paris"})
     )
 
