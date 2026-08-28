@@ -26,6 +26,7 @@ from .exceptions import (
     ValidationError,
 )
 from .models.campus import Campus
+from .models.campus_user import CampusUser
 from .models.user import User
 
 __all__ = [
@@ -34,6 +35,7 @@ __all__ = [
     "ClientConfig",
     "User",
     "Campus",
+    "CampusUser",
     "FortyTwoAPIError",
     "AuthenticationError",
     "PermissionDeniedError",

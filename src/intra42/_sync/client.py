@@ -18,6 +18,7 @@ from .._auth import TokenManager
 from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
 from ..exceptions import NetworkError, raise_for_status
+from .resources.campus_users import SyncCampusUsersResource
 from .resources.campuses import CampusesResource
 from .resources.users import UsersResource
 
@@ -61,6 +62,7 @@ class Client:
 
         self.users = UsersResource(self)
         self.campuses = CampusesResource(self)
+        self.campus_users = SyncCampusUsersResource(self)
 
     @property
     def base_url(self) -> str:

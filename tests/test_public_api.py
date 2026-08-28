@@ -3,6 +3,7 @@ def test_top_level_exports_are_importable() -> None:
         AsyncClient,
         AuthenticationError,
         Campus,
+        CampusUser,
         Client,
         ClientConfig,
         FortyTwoAPIError,
@@ -20,6 +21,7 @@ def test_top_level_exports_are_importable() -> None:
     assert ClientConfig is not None
     assert User is not None
     assert Campus is not None
+    assert CampusUser is not None
     assert issubclass(AuthenticationError, FortyTwoAPIError)
     assert issubclass(NetworkError, FortyTwoAPIError)
     assert issubclass(NotFoundError, FortyTwoAPIError)
