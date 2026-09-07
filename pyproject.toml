@@ -8,6 +8,21 @@ requires-python = ">=3.10"
 authors = [{ name = "Dan", email = "danyridolfo98@gmail.com" }]
 dependencies = ["httpx>=0.27", "pydantic>=2.0"]
 
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+    "Framework :: AsyncIO",
+]
+keywords = ["42", "42school", "api", "client", "intra"]
+
 [project.urls]
 Homepage = "https://github.com/Shadowaker/42api"
 
