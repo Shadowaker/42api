@@ -28,6 +28,7 @@ from .exceptions import (
 from .models.campus import Campus
 from .models.campus_user import CampusUser
 from .models.event import Event
+from .models.location import Location
 from .models.user import User
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "Campus",
     "CampusUser",
     "Event",
+    "Location",
     "FortyTwoAPIError",
     "AuthenticationError",
     "PermissionDeniedError",

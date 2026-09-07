@@ -21,6 +21,7 @@ from ..exceptions import NetworkError, raise_for_status
 from .resources.campus_users import SyncCampusUsersResource
 from .resources.campuses import CampusesResource
 from .resources.events import SyncEventsResource
+from .resources.locations import SyncLocationsResource
 from .resources.users import UsersResource
 
 
@@ -65,6 +66,7 @@ class Client:
         self.campuses = CampusesResource(self)
         self.campus_users = SyncCampusUsersResource(self)
         self.events = SyncEventsResource(self)
+        self.locations = SyncLocationsResource(self)
 
     @property
     def base_url(self) -> str:

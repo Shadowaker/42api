@@ -50,6 +50,23 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
+Fetched instances expose their nested resources directly — no need to
+build the scoped path yourself:
+
+```python
+campus = client.campuses.get(1)
+for event in campus.events:  # GET /campus/1/events
+    print(event.name)
+
+user = client.users.get("jdoe")
+for cu in user.campus_users:  # GET /users/jdoe/campus_users
+    print(cu.campus_id, cu.is_primary)
+```
+
+These (`campus.events`, `campus.users`, `user.events`, `user.campus_users`)
+are only available on instances fetched via a client — a manually
+constructed model raises a clear `RuntimeError` if accessed.
+
 Get your `client_id`/`client_secret` by registering an app at
 https://profile.intra.42.fr/oauth/applications. This library uses the
 **client credentials** flow, so it accesses the API as your app rather than
@@ -62,6 +79,13 @@ HTTP statuses: `AuthenticationError` (401), `PermissionDeniedError` (403),
 `NotFoundError` (404), `ValidationError` (422), `RateLimitError` (429, only
 raised once the built-in retry budget is exhausted), `ServerError` (5xx),
 and `NetworkError` (connection/timeout failures).
+
+## Status
+
+Early-stage: currently covers `users`, `campuses`, `campus_users`,
+`events`, and `locations` (including its `graph` analytics endpoint). More
+resources are added incrementally on top of the same client/model/
+query-builder pattern.
 
 ## Development
 

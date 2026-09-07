@@ -17,3 +17,7 @@ class AsyncCampusesResource(AsyncResource[Campus]):
             "events",
             lambda: self._client.events._queryset(f"/campus/{instance.id}/events"),
         )
+        instance._bind_relation(
+            "locations",
+            lambda: self._client.locations._queryset(f"/campus/{instance.id}/locations"),
+        )

@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from .._async.query import AsyncQuerySet
     from .._sync.query import QuerySet
     from .event import Event
+    from .location import Location
     from .user import User
 
 
@@ -58,3 +59,8 @@ class Campus(FortyTwoModel):
     def events(self) -> AsyncQuerySet[Event] | QuerySet[Event]:
         """Events at this campus (``GET /campus/{id}/events``)."""
         return self._relation("events")
+
+    @property
+    def locations(self) -> AsyncQuerySet[Location] | QuerySet[Location]:
+        """Login sessions at this campus (``GET /campus/{id}/locations``)."""
+        return self._relation("locations")

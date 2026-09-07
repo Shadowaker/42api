@@ -17,3 +17,7 @@ class AsyncUsersResource(AsyncResource[User]):
             "campus_users",
             lambda: self._client.campus_users._queryset(f"/users/{instance.id}/campus_users"),
         )
+        instance._bind_relation(
+            "locations",
+            lambda: self._client.locations._queryset(f"/users/{instance.id}/locations"),
+        )

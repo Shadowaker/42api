@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .._sync.query import QuerySet
     from .campus_user import CampusUser
     from .event import Event
+    from .location import Location
 
 
 class ImageVersions(FortyTwoModel):
@@ -62,3 +63,11 @@ class User(FortyTwoModel):
     def campus_users(self) -> AsyncQuerySet[CampusUser] | QuerySet[CampusUser]:
         """This user's campus memberships (``GET /users/{id}/campus_users``)."""
         return self._relation("campus_users")
+
+    @property
+    def locations(self) -> AsyncQuerySet[Location] | QuerySet[Location]:
+        """This user's login sessions (``GET /users/{id}/locations``).
+
+        Not to be confused with the ``location`` string field.
+        """
+        return self._relation("locations")
