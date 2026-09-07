@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import filecmp
+import re
 import shutil
 import subprocess
 import sys
@@ -31,28 +32,34 @@ GENERATED_HEADER = (
     "# async source and re-run that script instead.\n\n"
 )
 
-RULE = unasync.Rule(
-    fromdir=str(ASYNC_DIR),
-    todir=str(SYNC_DIR),
-    additional_replacements={
-        "AsyncClient": "Client",
-        "AsyncResource": "Resource",
-        "AsyncUsersResource": "UsersResource",
-        "AsyncCampusesResource": "CampusesResource",
-        "AsyncQuerySet": "QuerySet",
-        "aensure_token": "ensure_token",
-        "aacquire": "acquire",
-        "aclose": "close",
-        "__aenter__": "__enter__",
-        "__aexit__": "__exit__",
-        "__aiter__": "__iter__",
-        "__anext__": "__next__",
-    },
-)
+_ASYNC_CLASS_RE = re.compile(r"^class (Async[A-Z]\w*)", re.MULTILINE)
 
 
 def _find_async_files() -> list[str]:
     return [str(p) for p in ASYNC_DIR.rglob("*.py")]
+
+
+def _discover_class_renames() -> dict[str, str]:
+    """Map every `class Async<Name>` under _async/ to `<Name>`.
+    """
+    renames: dict[str, str] = {}
+    for path in _find_async_files():
+        for match in _ASYNC_CLASS_RE.finditer(Path(path).read_text()):
+            name = match.group(1)
+            renames[name] = name[len("Async") :]
+    return renames
+
+
+RULE = unasync.Rule(
+    fromdir=str(ASYNC_DIR),
+    todir=str(SYNC_DIR),
+    additional_replacements={
+        **_discover_class_renames(),
+        "aensure_token": "ensure_token",
+        "aacquire": "acquire",
+        "aclose": "close",
+    },
+)
 
 
 def _prepend_header(path: Path) -> None:

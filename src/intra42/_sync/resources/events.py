@@ -10,6 +10,6 @@ from ...models.event import Event
 from .base import Resource
 
 
-class SyncEventsResource(Resource[Event]):
+class EventsResource(Resource[Event]):
     path = "/events"
     model = Event

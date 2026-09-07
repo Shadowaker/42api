@@ -10,7 +10,7 @@ from ...models.location import Location
 from .base import Resource
 
 
-class SyncLocationsResource(Resource[Location]):
+class LocationsResource(Resource[Location]):
     path = "/locations"
     model = Location
 

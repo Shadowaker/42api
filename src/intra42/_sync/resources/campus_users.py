@@ -10,6 +10,6 @@ from ...models.campus_user import CampusUser
 from .base import Resource
 
 
-class SyncCampusUsersResource(Resource[CampusUser]):
+class CampusUsersResource(Resource[CampusUser]):
     path = "/campus_users"
     model = CampusUser
