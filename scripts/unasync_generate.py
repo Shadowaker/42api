@@ -40,8 +40,7 @@ def _find_async_files() -> list[str]:
 
 
 def _discover_class_renames() -> dict[str, str]:
-    """Map every `class Async<Name>` under _async/ to `<Name>`.
-    """
+    """Map every `class Async<Name>` under _async/ to `<Name>`."""
     renames: dict[str, str] = {}
     for path in _find_async_files():
         for match in _ASYNC_CLASS_RE.finditer(Path(path).read_text()):
