@@ -18,10 +18,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
     "Framework :: AsyncIO",
 ]
-keywords = ["42", "42school", "api", "client", "intra"]
+keywords = ["42", "42school", "api", "client", "intra", "intra42", "42staff"]
 
 [project.urls]
 Homepage = "https://github.com/Shadowaker/42api"
