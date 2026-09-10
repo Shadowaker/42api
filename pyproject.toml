@@ -1,6 +1,6 @@
 [project]
 name = "42api"
-version = "0.1.0"
+version = "0.1.1"
 description = "Object-oriented Python client for the 42 School API (api.intra.42.fr)"
 readme = "README.md"
 license = { text = "MIT" }
