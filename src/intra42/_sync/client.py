@@ -20,6 +20,7 @@ from .._rate_limit import RateLimiter
 from ..exceptions import NetworkError, raise_for_status
 from .resources.campus_users import CampusUsersResource
 from .resources.campuses import CampusesResource
+from .resources.cursus import CursusResource
 from .resources.events import EventsResource
 from .resources.locations import LocationsResource
 from .resources.users import UsersResource
@@ -65,6 +66,7 @@ class Client:
         self.users = UsersResource(self)
         self.campuses = CampusesResource(self)
         self.campus_users = CampusUsersResource(self)
+        self.cursus = CursusResource(self)
         self.events = EventsResource(self)
         self.locations = LocationsResource(self)
 

@@ -6,6 +6,7 @@ def test_top_level_exports_are_importable() -> None:
         CampusUser,
         Client,
         ClientConfig,
+        Cursus,
         Event,
         FortyTwoAPIError,
         Location,
@@ -24,6 +25,7 @@ def test_top_level_exports_are_importable() -> None:
     assert User is not None
     assert Campus is not None
     assert CampusUser is not None
+    assert Cursus is not None
     assert Event is not None
     assert Location is not None
     assert issubclass(AuthenticationError, FortyTwoAPIError)

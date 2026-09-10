@@ -27,6 +27,7 @@ from .exceptions import (
 )
 from .models.campus import Campus
 from .models.campus_user import CampusUser
+from .models.cursus import Cursus
 from .models.event import Event
 from .models.location import Location
 from .models.user import User
@@ -38,6 +39,7 @@ __all__ = [
     "User",
     "Campus",
     "CampusUser",
+    "Cursus",
     "Event",
     "Location",
     "FortyTwoAPIError",

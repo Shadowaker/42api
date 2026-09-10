@@ -83,9 +83,9 @@ and `NetworkError` (connection/timeout failures).
 ## Status
 
 Early-stage: currently covers `users`, `campuses`, `campus_users`,
-`events`, and `locations` (including its `graph` analytics endpoint). More
-resources are added incrementally on top of the same client/model/
-query-builder pattern.
+`cursus`, `events`, and `locations` (including its `graph` analytics
+endpoint). More resources are added incrementally on top of the same
+client/model/query-builder pattern.
 
 ## Development
 
