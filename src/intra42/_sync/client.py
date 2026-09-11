@@ -24,6 +24,8 @@ from .resources.campuses import CampusesResource
 from .resources.cursus import CursusResource
 from .resources.events import EventsResource
 from .resources.locations import LocationsResource
+from .resources.projects import ProjectsResource
+from .resources.projects_users import ProjectUsersResource
 from .resources.users import UsersResource
 
 
@@ -71,6 +73,8 @@ class Client:
         self.cursus = CursusResource(self)
         self.events = EventsResource(self)
         self.locations = LocationsResource(self)
+        self.projects = ProjectsResource(self)
+        self.projects_users = ProjectUsersResource(self)
 
     @property
     def base_url(self) -> str:

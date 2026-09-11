@@ -51,13 +51,13 @@ async def test_filter_and_sort_are_sent_as_query_params(mock_token_route) -> Non
 
     client = AsyncClient("id", "secret")
     try:
-        await client.users.filter(campus_id=1).sort("-level").all()
+        await client.users.filter(primary_campus_id=1).sort("-pool_year").all()
     finally:
         await client.aclose()
 
     request = route.calls.last.request
-    assert request.url.params["filter[campus_id]"] == "1"
-    assert request.url.params["sort"] == "-level"
+    assert request.url.params["filter[primary_campus_id]"] == "1"
+    assert request.url.params["sort"] == "-pool_year"
 
 
 def test_all_walks_every_page_sync(mock_token_route) -> None:

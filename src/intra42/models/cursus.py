@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from .._async.query import AsyncQuerySet
     from .._sync.query import QuerySet
     from .event import Event
+    from .project import Project
     from .user import User
 
 
@@ -33,3 +34,8 @@ class Cursus(FortyTwoModel):
     def events(self) -> AsyncQuerySet[Event] | QuerySet[Event]:
         """Events for this cursus (``GET /cursus/{id}/events``)."""
         return self._relation("events")
+
+    @property
+    def projects(self) -> AsyncQuerySet[Project] | QuerySet[Project]:
+        """Projects belonging to this cursus (``GET /cursus/{id}/projects``)."""
+        return self._relation("projects")

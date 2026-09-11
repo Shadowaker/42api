@@ -29,7 +29,7 @@ with Client(client_id="...", client_secret="...") as client:
     user = client.users.get("jdoe")
     print(user.login, user.email)
 
-    for user in client.users.filter(campus_id=1).sort("-level"):
+    for user in client.users.filter(primary_campus_id=1).sort("-pool_year"):
         print(user.login)
 ```
 
@@ -43,7 +43,7 @@ from intra42 import AsyncClient
 async def main() -> None:
     async with AsyncClient(client_id="...", client_secret="...") as client:
         user = await client.users.get("jdoe")
-        async for user in client.users.filter(campus_id=1).sort("-level"):
+        async for user in client.users.filter(primary_campus_id=1).sort("-pool_year"):
             print(user.login)
 
 
@@ -83,9 +83,10 @@ and `NetworkError` (connection/timeout failures).
 ## Status
 
 Early-stage: currently covers `users`, `accreditations`, `campuses`,
-`campus_users`, `cursus`, `events`, and `locations` (including its `graph`
-analytics endpoint). More resources are added incrementally on top of the
-same client/model/query-builder pattern.
+`campus_users`, `cursus`, `events`, `locations`, `projects`, and
+`projects_users` (both `locations` and `projects_users` include their
+`graph` analytics endpoint). More resources are added incrementally on top
+of the same client/model/query-builder pattern.
 The api with restricted access are not implemented currently.
 
 ## Development

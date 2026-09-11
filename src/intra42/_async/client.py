@@ -18,6 +18,8 @@ from .resources.campuses import AsyncCampusesResource
 from .resources.cursus import AsyncCursusResource
 from .resources.events import AsyncEventsResource
 from .resources.locations import AsyncLocationsResource
+from .resources.projects import AsyncProjectsResource
+from .resources.projects_users import AsyncProjectUsersResource
 from .resources.users import AsyncUsersResource
 
 
@@ -65,6 +67,8 @@ class AsyncClient:
         self.cursus = AsyncCursusResource(self)
         self.events = AsyncEventsResource(self)
         self.locations = AsyncLocationsResource(self)
+        self.projects = AsyncProjectsResource(self)
+        self.projects_users = AsyncProjectUsersResource(self)
 
     @property
     def base_url(self) -> str:

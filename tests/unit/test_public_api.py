@@ -14,6 +14,8 @@ def test_top_level_exports_are_importable() -> None:
         NetworkError,
         NotFoundError,
         PermissionDeniedError,
+        Project,
+        ProjectUser,
         RateLimitError,
         ServerError,
         User,
@@ -30,6 +32,8 @@ def test_top_level_exports_are_importable() -> None:
     assert Cursus is not None
     assert Event is not None
     assert Location is not None
+    assert Project is not None
+    assert ProjectUser is not None
     assert issubclass(AuthenticationError, FortyTwoAPIError)
     assert issubclass(NetworkError, FortyTwoAPIError)
     assert issubclass(NotFoundError, FortyTwoAPIError)

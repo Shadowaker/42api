@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from .campus_user import CampusUser
     from .event import Event
     from .location import Location
+    from .project_user import ProjectUser
 
 
 class ImageVersions(FortyTwoModel):
@@ -71,3 +72,8 @@ class User(FortyTwoModel):
         Not to be confused with the ``location`` string field.
         """
         return self._relation("locations")
+
+    @property
+    def projects_users(self) -> AsyncQuerySet[ProjectUser] | QuerySet[ProjectUser]:
+        """This user's project assignments (``GET /users/{id}/projects_users``)."""
+        return self._relation("projects_users")

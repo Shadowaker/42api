@@ -4,7 +4,7 @@
 
     with Client(client_id, client_secret) as client:
         user = client.users.get("jdoe")
-        for user in client.users.filter(campus_id=1).sort("-level"):
+        for user in client.users.filter(primary_campus_id=1).sort("-pool_year"):
             ...
 
 An async client with the same interface is available as ``AsyncClient``.
@@ -31,6 +31,8 @@ from .models.campus_user import CampusUser
 from .models.cursus import Cursus
 from .models.event import Event
 from .models.location import Location
+from .models.project import Project
+from .models.project_user import ProjectUser
 from .models.user import User
 
 __all__ = [
@@ -44,6 +46,8 @@ __all__ = [
     "Cursus",
     "Event",
     "Location",
+    "Project",
+    "ProjectUser",
     "FortyTwoAPIError",
     "AuthenticationError",
     "PermissionDeniedError",

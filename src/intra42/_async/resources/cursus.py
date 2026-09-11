@@ -17,3 +17,7 @@ class AsyncCursusResource(AsyncResource[Cursus]):
             "events",
             lambda: self._client.events._queryset(f"/cursus/{instance.id}/events"),
         )
+        instance._bind_relation(
+            "projects",
+            lambda: self._client.projects._queryset(f"/cursus/{instance.id}/projects"),
+        )
