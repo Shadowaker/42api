@@ -1,5 +1,6 @@
 def test_top_level_exports_are_importable() -> None:
     from intra42 import (
+        Accreditation,
         AsyncClient,
         AuthenticationError,
         Campus,
@@ -22,6 +23,7 @@ def test_top_level_exports_are_importable() -> None:
     assert AsyncClient is not None
     assert Client is not None
     assert ClientConfig is not None
+    assert Accreditation is not None
     assert User is not None
     assert Campus is not None
     assert CampusUser is not None

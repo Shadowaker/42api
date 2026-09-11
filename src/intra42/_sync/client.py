@@ -18,6 +18,7 @@ from .._auth import TokenManager
 from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
 from ..exceptions import NetworkError, raise_for_status
+from .resources.accreditations import AccreditationsResource
 from .resources.campus_users import CampusUsersResource
 from .resources.campuses import CampusesResource
 from .resources.cursus import CursusResource
@@ -64,6 +65,7 @@ class Client:
         )
 
         self.users = UsersResource(self)
+        self.accreditations = AccreditationsResource(self)
         self.campuses = CampusesResource(self)
         self.campus_users = CampusUsersResource(self)
         self.cursus = CursusResource(self)

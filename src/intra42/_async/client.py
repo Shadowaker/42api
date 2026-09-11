@@ -12,6 +12,7 @@ from .._auth import TokenManager
 from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
 from ..exceptions import NetworkError, raise_for_status
+from .resources.accreditations import AsyncAccreditationsResource
 from .resources.campus_users import AsyncCampusUsersResource
 from .resources.campuses import AsyncCampusesResource
 from .resources.cursus import AsyncCursusResource
@@ -58,6 +59,7 @@ class AsyncClient:
         )
 
         self.users = AsyncUsersResource(self)
+        self.accreditations = AsyncAccreditationsResource(self)
         self.campuses = AsyncCampusesResource(self)
         self.campus_users = AsyncCampusUsersResource(self)
         self.cursus = AsyncCursusResource(self)

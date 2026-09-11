@@ -25,6 +25,7 @@ from .exceptions import (
     ServerError,
     ValidationError,
 )
+from .models.accreditation import Accreditation
 from .models.campus import Campus
 from .models.campus_user import CampusUser
 from .models.cursus import Cursus
@@ -37,6 +38,7 @@ __all__ = [
     "Client",
     "ClientConfig",
     "User",
+    "Accreditation",
     "Campus",
     "CampusUser",
     "Cursus",
