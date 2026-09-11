@@ -86,6 +86,7 @@ Early-stage: currently covers `users`, `accreditations`, `campuses`,
 `campus_users`, `cursus`, `events`, and `locations` (including its `graph`
 analytics endpoint). More resources are added incrementally on top of the
 same client/model/query-builder pattern.
+The api with restricted access are not implemented currently.
 
 ## Development
 
