@@ -23,6 +23,7 @@ from .resources.campus_users import CampusUsersResource
 from .resources.campuses import CampusesResource
 from .resources.cursus import CursusResource
 from .resources.events import EventsResource
+from .resources.exams import ExamsResource
 from .resources.locations import LocationsResource
 from .resources.projects import ProjectsResource
 from .resources.projects_users import ProjectUsersResource
@@ -72,6 +73,7 @@ class Client:
         self.campus_users = CampusUsersResource(self)
         self.cursus = CursusResource(self)
         self.events = EventsResource(self)
+        self.exams = ExamsResource(self)
         self.locations = LocationsResource(self)
         self.projects = ProjectsResource(self)
         self.projects_users = ProjectUsersResource(self)

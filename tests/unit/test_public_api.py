@@ -9,6 +9,7 @@ def test_top_level_exports_are_importable() -> None:
         ClientConfig,
         Cursus,
         Event,
+        Exam,
         FortyTwoAPIError,
         Location,
         NetworkError,
@@ -31,6 +32,7 @@ def test_top_level_exports_are_importable() -> None:
     assert CampusUser is not None
     assert Cursus is not None
     assert Event is not None
+    assert Exam is not None
     assert Location is not None
     assert Project is not None
     assert ProjectUser is not None

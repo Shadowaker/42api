@@ -83,10 +83,10 @@ and `NetworkError` (connection/timeout failures).
 ## Status
 
 Early-stage: currently covers `users`, `accreditations`, `campuses`,
-`campus_users`, `cursus`, `events`, `locations`, `projects`, and
-`projects_users` (both `locations` and `projects_users` include their
-`graph` analytics endpoint). More resources are added incrementally on top
-of the same client/model/query-builder pattern.
+`campus_users`, `cursus`, `events`, `exams`, `locations`, `projects`, and
+`projects_users` (`exams`, `locations`, and `projects_users` each include
+their `graph` analytics endpoint). More resources are added incrementally
+on top of the same client/model/query-builder pattern.
 The api with restricted access are not implemented currently.
 
 ## Development

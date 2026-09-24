@@ -30,6 +30,7 @@ from .models.campus import Campus
 from .models.campus_user import CampusUser
 from .models.cursus import Cursus
 from .models.event import Event
+from .models.exam import Exam
 from .models.location import Location
 from .models.project import Project
 from .models.project_user import ProjectUser
@@ -45,6 +46,7 @@ __all__ = [
     "CampusUser",
     "Cursus",
     "Event",
+    "Exam",
     "Location",
     "Project",
     "ProjectUser",
