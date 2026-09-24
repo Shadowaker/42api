@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from urllib.parse import parse_qsl, urlsplit
 
 from .._pagination import parse_link_header
 from .._query_params import build_query_params
@@ -84,8 +85,20 @@ class QuerySet(Generic[ModelT]):
         )
 
     def __iter__(self) -> Iterator[ModelT]:
+        # `base_params` (filter/sort/page_size/range) is re-applied on every
+        # page, not just the first. Confirmed against the live API: the
+        # `next` link's own query string always uses a *bare* `page=N`
+        # cursor — a different, incompatible pagination scheme from the
+        # bracketed `page[size]`/`page[number]` this library sends, and the
+        # server returns 400 if both appear on the same request. So rather
+        # than forwarding the link's query string as-is (which either loses
+        # page_size or actively errors once you try to keep it), we extract
+        # just the page *number* from the link and reissue it as
+        # `page[number]`, combined with our own persisted page_size/filter/
+        # sort/range.
+        base_params = self._initial_params()
         url: str | None = self._path
-        params: dict[str, str] | None = self._initial_params()
+        params: dict[str, str] | None = base_params
         while url is not None:
             response = self._client.request("GET", url, params=params)
             for item in response.json():
@@ -93,8 +106,18 @@ class QuerySet(Generic[ModelT]):
                 if self._bind is not None:
                     self._bind(instance)
                 yield instance
-            url = parse_link_header(response.headers.get("Link")).get("next")
-            params = None  # the next URL already carries its full query string
+
+            next_url = parse_link_header(response.headers.get("Link")).get("next")
+            if next_url is None:
+                break
+
+            split = urlsplit(next_url)
+            url = f"{split.scheme}://{split.netloc}{split.path}" if split.scheme else split.path
+            next_query = dict(parse_qsl(split.query))
+            page_number = next_query.pop("page[number]", None) or next_query.pop("page", None)
+            params = {**next_query, **base_params}
+            if page_number is not None:
+                params["page[number]"] = page_number
 
     def all(self) -> list[ModelT]:
         return [item for item in self]
