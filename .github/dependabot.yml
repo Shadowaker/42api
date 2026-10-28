@@ -1,0 +1,26 @@
+version: 2
+
+updates:
+  # Python dependencies, resolved via uv.lock.
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+
+  # Keep the CI/publish workflows' pinned actions 
+  # patched too, action versions get security
+  # advisories same as any other dependency.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci"
