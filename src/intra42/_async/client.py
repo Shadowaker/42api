@@ -81,15 +81,16 @@ class AsyncClient:
         """
         Resolve ``path`` against ``base_url``.
 
-        Absolute URLs are accepted only when their scheme and host match ``base_url``: every request carries
-        the Bearer token, so following a URL to any other origin would leak it.
+        Absolute URLs are accepted only when their scheme and host match ``base_url``:
+        every request carries the Bearer token, so following a URL to any other
+        origin would leak it.
         """
         if path.startswith("http://") or path.startswith("https://"):
             target = urlsplit(path)
             base = urlsplit(self._config.base_url)
             if (target.scheme, target.netloc.lower()) != (base.scheme, base.netloc.lower()):
                 raise FortyTwoAPIError(
-                    f"URL does not match base_url"
+                    "URL does not match base_url"
                 )
             return path
         return f"{self._config.base_url}{path}"
