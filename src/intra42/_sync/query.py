@@ -117,7 +117,8 @@ class QuerySet(Generic[ModelT]):
             split = urlsplit(next_url)
             url = f"{split.scheme}://{split.netloc}{split.path}" if split.scheme else split.path
             next_query = dict(parse_qsl(split.query))
-            page_number = next_query.pop("page[number]", None) or next_query.pop("page", None)
+            bare_page = next_query.pop("page", None)
+            page_number = next_query.pop("page[number]", None) or bare_page
             params = {**next_query, **base_params}
             if page_number is not None:
                 params["page[number]"] = page_number

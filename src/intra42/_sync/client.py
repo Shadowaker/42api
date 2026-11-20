@@ -10,6 +10,7 @@ implementation of the request logic here.
 
 from __future__ import annotations
 
+import random
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -29,6 +30,21 @@ from .resources.locations import LocationsResource
 from .resources.projects import ProjectsResource
 from .resources.projects_users import ProjectUsersResource
 from .resources.users import UsersResource
+
+# Gateway/availability errors that are usually transient. 500 is left out on
+# purpose: it typically signals a deterministic server-side bug.
+_RETRYABLE_STATUSES = frozenset({502, 503, 504})
+# Methods safe to resend after the server may already have processed them.
+_IDEMPOTENT_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+# Failures raised before the request reached the server: safe to retry for
+# any method, since nothing was sent.
+_NOT_SENT_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout)
+_MAX_BACKOFF = 8.0
+
+
+def _backoff_delay(base: float, retry: int) -> float:
+    """Full-jitter exponential backoff: ``uniform(0, min(cap, base * 2**retry))``."""
+    return random.uniform(0.0, min(_MAX_BACKOFF, base * 2**retry))
 
 
 def _parse_retry_after(value: str | None) -> float:
@@ -113,13 +129,26 @@ class Client:
         ``Retry-After`` header via the shared rate limiter's cooldown gate,
         before raising :class:`intra42.exceptions.RateLimitError`.
 
+        Transient failures (502/503/504 and network errors) are retried with
+        full-jitter exponential backoff, honoring ``Retry-After`` when the
+        server sends one. Only idempotent methods (GET/HEAD/OPTIONS) are
+        retried, except for connection failures where the request was never
+        sent. 429s and transient failures share the ``max_retries`` budget;
+        once it's spent, :class:`intra42.exceptions.ServerError` or
+        :class:`intra42.exceptions.NetworkError` is raised.
+
+        Backoff waits go through the rate limiter's shared cooldown gate, so
+        they also pause other in-flight requests on this client — deliberate,
+        since a struggling server or network affects them all.
+
         On a 401 the cached token is discarded and the request is retried
         once with a freshly fetched token (it may have been revoked or
         expired server-side early); a second 401 raises
         :class:`intra42.exceptions.AuthenticationError`.
         """
         url = self._build_url(path)
-        rate_limit_retries = 0
+        idempotent = method.upper() in _IDEMPOTENT_METHODS
+        retries = 0
         auth_retried = False
 
         while True:
@@ -134,20 +163,40 @@ class Client:
                     headers={"Authorization": f"Bearer {token}"},
                 )
             except httpx.TransportError as exc:
+                retryable = idempotent or isinstance(exc, _NOT_SENT_ERRORS)
+                if retryable and retries < self._config.max_retries:
+                    self._rate_limiter.notify_retry_after(
+                        _backoff_delay(self._config.retry_backoff, retries)
+                    )
+                    retries += 1
+                    continue
                 raise NetworkError(f"Request to {url} failed: {exc}") from exc
 
-            if response.status_code == 401 and not auth_retried:
+            status = response.status_code
+
+            if status == 401 and not auth_retried:
                 auth_retried = True
                 self._token_manager.invalidate(token)
                 continue
 
-            if response.status_code == 429:
+            if status == 429:
                 self._rate_limiter.notify_retry_after(
                     _parse_retry_after(response.headers.get("Retry-After"))
                 )
-                if rate_limit_retries < self._config.max_retries:
-                    rate_limit_retries += 1
+                if retries < self._config.max_retries:
+                    retries += 1
                     continue
+            elif (
+                status in _RETRYABLE_STATUSES and idempotent and retries < self._config.max_retries
+            ):
+                retry_after = response.headers.get("Retry-After")
+                self._rate_limiter.notify_retry_after(
+                    _parse_retry_after(retry_after)
+                    if retry_after is not None
+                    else _backoff_delay(self._config.retry_backoff, retries)
+                )
+                retries += 1
+                continue
 
             raise_for_status(response)
             return response

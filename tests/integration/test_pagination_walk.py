@@ -123,6 +123,34 @@ async def test_next_link_missing_page_size_is_restored(mock_token_route) -> None
     assert "page" not in second_request.url.params
 
 
+async def test_next_link_with_both_page_keys_forwards_only_page_number(
+    mock_token_route,
+) -> None:
+    """If a `next` link carries both `page` and `page[number]`, the bare
+    `page` must still be dropped rather than forwarded alongside it."""
+    mock, _ = mock_token_route
+    page_1 = httpx.Response(
+        200,
+        json=[{"id": 1}],
+        headers={
+            "Link": '<https://api.intra.42.fr/v2/users?page=9&page%5Bnumber%5D=2>; rel="next"'
+        },
+    )
+    page_2 = httpx.Response(200, json=[{"id": 2}])
+    route = mock.get("https://api.intra.42.fr/v2/users").mock(side_effect=[page_1, page_2])
+
+    client = AsyncClient("id", "secret")
+    try:
+        users = await client.users.all()
+    finally:
+        await client.aclose()
+
+    assert [u.id for u in users] == [1, 2]
+    second_request = route.calls[1].request
+    assert second_request.url.params["page[number]"] == "2"  # bracketed wins
+    assert "page" not in second_request.url.params
+
+
 def test_next_link_missing_page_size_is_restored_sync(mock_token_route) -> None:
     mock, _ = mock_token_route
     page_1 = httpx.Response(
