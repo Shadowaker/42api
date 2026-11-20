@@ -12,6 +12,8 @@ An async client with the same interface is available as ``AsyncClient``.
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError, version
+
 from ._async.client import AsyncClient
 from ._config import ClientConfig
 from ._sync.client import Client
@@ -60,4 +62,9 @@ __all__ = [
     "NetworkError",
 ]
 
-__version__ = "0.1.3"
+# Single source of truth is pyproject.toml; read it from the installed
+# distribution metadata rather than hardcoding a copy that drifts.
+try:
+    __version__ = version("42api")
+except PackageNotFoundError:  # pragma: no cover - running from an uninstalled source tree
+    __version__ = "0.0.0+unknown"
