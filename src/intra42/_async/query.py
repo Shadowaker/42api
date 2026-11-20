@@ -71,10 +71,13 @@ class AsyncQuerySet(Generic[ModelT]):
         return clone
 
     def _initial_params(self) -> dict[str, str]:
+        page_size = self._page_size
+        if page_size is None:
+            page_size = self._client._config.default_page_size
         return build_query_params(
             filters=self._filters,
             sort=self._sort_fields,
-            page_size=self._page_size,
+            page_size=page_size,
             ranges=self._ranges,
         )
 
@@ -117,6 +120,6 @@ class AsyncQuerySet(Generic[ModelT]):
         return [item async for item in self]
 
     async def first(self) -> ModelT | None:
-        async for item in self:
+        async for item in self.page_size(1):
             return item
         return None
