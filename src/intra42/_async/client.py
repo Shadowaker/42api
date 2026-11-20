@@ -89,9 +89,7 @@ class AsyncClient:
             target = urlsplit(path)
             base = urlsplit(self._config.base_url)
             if (target.scheme, target.netloc.lower()) != (base.scheme, base.netloc.lower()):
-                raise FortyTwoAPIError(
-                    "URL does not match base_url"
-                )
+                raise FortyTwoAPIError("URL does not match base_url")
             return path
         return f"{self._config.base_url}{path}"
 
@@ -122,7 +120,7 @@ class AsyncClient:
             token = await self._token_manager.aensure_token(self._http)
             await self._rate_limiter.aacquire()
             try:
-                response: httpx.Response | None = await self._http.request(
+                response = await self._http.request(
                     method,
                     url,
                     params=params,
