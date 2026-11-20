@@ -17,7 +17,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
+          # Pinned for reproducible builds, keep in sync with publish.yml.
+          version: "0.11.16"
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
