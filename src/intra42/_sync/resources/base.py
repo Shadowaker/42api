@@ -39,6 +39,15 @@ class Resource(Generic[ModelT]):
     def __init__(self, client: Client) -> None:
         self._client = client
 
+    def _scoped_path(self, parent: int | str | FortyTwoModel, sub_path: str) -> str:
+        """Build ``{path}/{parent_id}/{sub_path}`` for a nested-resource method.
+
+        ``parent`` may be an id/login or an already-fetched instance,
+        so callers can skip fetching the parent first.
+        """
+        parent_id = parent if isinstance(parent, (int, str)) else cast(Any, parent).id
+        return f"{self.path}/{path_segment(parent_id)}/{sub_path}"
+
     def _bind_relations(self, instance: ModelT) -> None:
         """Attach nested-resource accessors to a freshly parsed instance.
 
