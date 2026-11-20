@@ -16,6 +16,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, cast
 
+from ..._paths import path_segment
 from ...models.base import FortyTwoModel
 from ..query import AsyncQuerySet
 
@@ -41,8 +42,12 @@ class AsyncResource(Generic[ModelT]):
         return
 
     async def get(self, id: int | str) -> ModelT:
-        """Fetch a single resource by id: ``GET {path}/{id}``."""
-        response = await self._client.request("GET", f"{self.path}/{id}")
+        """Fetch a single resource by id: ``GET {path}/{id}``.
+
+        ``id`` is percent-encoded as one path segment; raises ``ValueError``
+        for an empty, ``"."`` or ``".."`` id.
+        """
+        response = await self._client.request("GET", f"{self.path}/{path_segment(id)}")
         instance = cast(ModelT, self.model.model_validate(response.json()))
         self._bind_relations(instance)
         return instance

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from ..._paths import path_segment
 from ...models.exam import Exam
 from .base import AsyncResource
 
@@ -16,8 +17,8 @@ class AsyncExamsResource(AsyncResource[Exam]):
         if interval is not None and field is None:
             field = "created_at"
         if field is not None:
-            path += f"/on/{field}"
+            path += f"/on/{path_segment(field)}"
             if interval is not None:
-                path += f"/by/{interval}"
+                path += f"/by/{path_segment(interval)}"
         response = await self._client.request("GET", path)
         return response.json()

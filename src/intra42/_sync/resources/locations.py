@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from ..._paths import path_segment
 from ...models.location import Location
 from .base import Resource
 
@@ -27,8 +28,8 @@ class LocationsResource(Resource[Location]):
         if interval is not None and field is None:
             field = "begin_at"
         if field is not None:
-            path += f"/on/{field}"
+            path += f"/on/{path_segment(field)}"
             if interval is not None:
-                path += f"/by/{interval}"
+                path += f"/by/{path_segment(interval)}"
         response = self._client.request("GET", path)
         return response.json()

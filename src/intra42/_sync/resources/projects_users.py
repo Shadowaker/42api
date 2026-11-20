@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from ..._paths import path_segment
 from ...models.project_user import ProjectUser
 from .base import Resource
 
@@ -19,8 +20,8 @@ class ProjectUsersResource(Resource[ProjectUser]):
         if interval is not None and field is None:
             field = "created_at"
         if field is not None:
-            path += f"/on/{field}"
+            path += f"/on/{path_segment(field)}"
             if interval is not None:
-                path += f"/by/{interval}"
+                path += f"/by/{path_segment(interval)}"
         response = self._client.request("GET", path)
         return response.json()
