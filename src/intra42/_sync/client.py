@@ -11,13 +11,14 @@ implementation of the request logic here.
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 
 from .._auth import TokenManager
 from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
-from ..exceptions import NetworkError, raise_for_status
+from ..exceptions import FortyTwoAPIError, NetworkError, raise_for_status
 from .resources.accreditations import AccreditationsResource
 from .resources.campus_users import CampusUsersResource
 from .resources.campuses import CampusesResource
@@ -83,7 +84,21 @@ class Client:
         return self._config.base_url
 
     def _build_url(self, path: str) -> str:
+        """Resolve ``path`` against ``base_url``.
+
+        Absolute URLs (e.g. pagination ``Link`` targets) are accepted only
+        when their scheme and host match ``base_url``: every request carries
+        the Bearer token, so following a URL to any other origin would leak
+        it.
+        """
         if path.startswith("http://") or path.startswith("https://"):
+            target = urlsplit(path)
+            base = urlsplit(self._config.base_url)
+            if (target.scheme, target.netloc.lower()) != (base.scheme, base.netloc.lower()):
+                raise FortyTwoAPIError(
+                    f"Refusing to send credentials to {target.scheme}://{target.netloc}: "
+                    f"URL does not match base_url origin {base.scheme}://{base.netloc}"
+                )
             return path
         return f"{self._config.base_url}{path}"
 
@@ -100,11 +115,17 @@ class Client:
         Retries on 429 up to ``max_retries`` times, honoring the response's
         ``Retry-After`` header via the shared rate limiter's cooldown gate,
         before raising :class:`intra42.exceptions.RateLimitError`.
+
+        On a 401 the cached token is discarded and the request is retried
+        once with a freshly fetched token (it may have been revoked or
+        expired server-side early); a second 401 raises
+        :class:`intra42.exceptions.AuthenticationError`.
         """
         url = self._build_url(path)
-        response: httpx.Response | None = None
+        rate_limit_retries = 0
+        auth_retried = False
 
-        for attempt in range(self._config.max_retries + 1):
+        while True:
             token = self._token_manager.ensure_token(self._http)
             self._rate_limiter.acquire()
             try:
@@ -118,19 +139,21 @@ class Client:
             except httpx.TransportError as exc:
                 raise NetworkError(f"Request to {url} failed: {exc}") from exc
 
+            if response.status_code == 401 and not auth_retried:
+                auth_retried = True
+                self._token_manager.invalidate(token)
+                continue
+
             if response.status_code == 429:
                 self._rate_limiter.notify_retry_after(
                     _parse_retry_after(response.headers.get("Retry-After"))
                 )
-                if attempt < self._config.max_retries:
+                if rate_limit_retries < self._config.max_retries:
+                    rate_limit_retries += 1
                     continue
 
             raise_for_status(response)
             return response
-
-        assert response is not None  # loop always runs at least once
-        raise_for_status(response)
-        return response  # pragma: no cover - raise_for_status always raises on a 429
 
     def close(self) -> None:
         self._http.close()

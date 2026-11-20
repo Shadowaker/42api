@@ -44,6 +44,12 @@ class TokenManager:
     def _is_valid(self) -> bool:
         return self._access_token is not None and time.time() < self._expires_at - self._leeway
 
+    def invalidate(self, token: str) -> None:
+        with self._lock:
+            if self._access_token == token:
+                self._access_token = None
+                self._expires_at = 0.0
+
     def _body(self) -> dict[str, str]:
         return {
             "grant_type": "client_credentials",
