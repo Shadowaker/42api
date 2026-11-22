@@ -107,3 +107,34 @@ class TokenManager:
                     response=response,
                 )
             return self._store(response.json())
+
+
+class StaticTokenManager:
+    """A token source backed by a pre-obtained access token.
+
+    Used when a client acts on behalf of a user (authorization-code flow)
+    rather than as the application (client-credentials). The token is used
+    verbatim and never refreshed, so write endpoints that require a
+    resource-owner token (e.g. ``events_users``) can be called. Exposes the
+    same ``ensure_token`` / ``aensure_token`` interface as :class:`TokenManager`.
+    """
+
+    def __init__(self, access_token: str) -> None:
+        if not access_token:
+            raise AuthenticationError("access_token must be a non-empty string")
+        self._access_token = access_token
+
+    def invalidate(self, token: str) -> None:
+        """No-op: a caller-supplied token has no cached state to refresh.
+
+        Part of the token-source interface the client's 401 handler relies on.
+        Unlike :class:`TokenManager`, there is no credentials grant to re-run, so
+        the token is kept as-is; the handler's single retry re-sends it and a
+        second 401 surfaces as :class:`AuthenticationError`.
+        """
+
+    def ensure_token(self, http: httpx.Client) -> str:
+        return self._access_token
+
+    async def aensure_token(self, http: httpx.AsyncClient) -> str:
+        return self._access_token

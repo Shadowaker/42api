@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from .._auth import TokenManager
+from .._auth import StaticTokenManager, TokenManager
 from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
 from ..exceptions import FortyTwoAPIError, NetworkError, raise_for_status
@@ -19,6 +19,7 @@ from .resources.campus_users import AsyncCampusUsersResource
 from .resources.campuses import AsyncCampusesResource
 from .resources.cursus import AsyncCursusResource
 from .resources.events import AsyncEventsResource
+from .resources.events_users import AsyncEventsUsersResource
 from .resources.exams import AsyncExamsResource
 from .resources.locations import AsyncLocationsResource
 from .resources.projects import AsyncProjectsResource
@@ -59,19 +60,27 @@ class AsyncClient:
 
     def __init__(
         self,
-        client_id: str,
-        client_secret: str,
+        client_id: str = "",
+        client_secret: str = "",
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = 10.0,
         max_retries: int = 3,
         config: ClientConfig | None = None,
+        access_token: str | None = None,
     ) -> None:
         self._config = config or ClientConfig(
             base_url=base_url, timeout=timeout, max_retries=max_retries
         )
         self._http = httpx.AsyncClient(timeout=self._config.timeout)
-        self._token_manager = TokenManager(client_id, client_secret)
+        # A user (resource-owner) access token authenticates as that user and
+        # unlocks user-scoped write endpoints; otherwise authenticate as the
+        # application via client-credentials.
+        self._token_manager: TokenManager | StaticTokenManager = (
+            StaticTokenManager(access_token)
+            if access_token is not None
+            else TokenManager(client_id, client_secret)
+        )
         self._rate_limiter = RateLimiter(
             rate=self._config.rate,
             burst=self._config.burst,
@@ -84,10 +93,36 @@ class AsyncClient:
         self.campus_users = AsyncCampusUsersResource(self)
         self.cursus = AsyncCursusResource(self)
         self.events = AsyncEventsResource(self)
+        self.events_users = AsyncEventsUsersResource(self)
         self.exams = AsyncExamsResource(self)
         self.locations = AsyncLocationsResource(self)
         self.projects = AsyncProjectsResource(self)
         self.projects_users = AsyncProjectUsersResource(self)
+
+    @classmethod
+    def from_access_token(
+        cls,
+        access_token: str,
+        *,
+        base_url: str = DEFAULT_BASE_URL,
+        timeout: float = 10.0,
+        max_retries: int = 3,
+        config: ClientConfig | None = None,
+    ) -> AsyncClient:
+        """Build a client that authenticates as a user with ``access_token``.
+
+        Use this (instead of ``client_id``/``client_secret``) to call
+        user-scoped endpoints such as ``events_users.subscribe``. The token is
+        a resource-owner token obtained via the authorization-code flow and is
+        used as-is (not refreshed).
+        """
+        return cls(
+            base_url=base_url,
+            timeout=timeout,
+            max_retries=max_retries,
+            config=config,
+            access_token=access_token,
+        )
 
     @property
     def base_url(self) -> str:

@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from .._auth import TokenManager
+from .._auth import StaticTokenManager, TokenManager
 from .._config import DEFAULT_BASE_URL, ClientConfig
 from .._rate_limit import RateLimiter
 from ..exceptions import FortyTwoAPIError, NetworkError, raise_for_status
@@ -25,6 +25,7 @@ from .resources.campus_users import CampusUsersResource
 from .resources.campuses import CampusesResource
 from .resources.cursus import CursusResource
 from .resources.events import EventsResource
+from .resources.events_users import EventsUsersResource
 from .resources.exams import ExamsResource
 from .resources.locations import LocationsResource
 from .resources.projects import ProjectsResource
@@ -65,19 +66,27 @@ class Client:
 
     def __init__(
         self,
-        client_id: str,
-        client_secret: str,
+        client_id: str = "",
+        client_secret: str = "",
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = 10.0,
         max_retries: int = 3,
         config: ClientConfig | None = None,
+        access_token: str | None = None,
     ) -> None:
         self._config = config or ClientConfig(
             base_url=base_url, timeout=timeout, max_retries=max_retries
         )
         self._http = httpx.Client(timeout=self._config.timeout)
-        self._token_manager = TokenManager(client_id, client_secret)
+        # A user (resource-owner) access token authenticates as that user and
+        # unlocks user-scoped write endpoints; otherwise authenticate as the
+        # application via client-credentials.
+        self._token_manager: TokenManager | StaticTokenManager = (
+            StaticTokenManager(access_token)
+            if access_token is not None
+            else TokenManager(client_id, client_secret)
+        )
         self._rate_limiter = RateLimiter(
             rate=self._config.rate,
             burst=self._config.burst,
@@ -90,10 +99,36 @@ class Client:
         self.campus_users = CampusUsersResource(self)
         self.cursus = CursusResource(self)
         self.events = EventsResource(self)
+        self.events_users = EventsUsersResource(self)
         self.exams = ExamsResource(self)
         self.locations = LocationsResource(self)
         self.projects = ProjectsResource(self)
         self.projects_users = ProjectUsersResource(self)
+
+    @classmethod
+    def from_access_token(
+        cls,
+        access_token: str,
+        *,
+        base_url: str = DEFAULT_BASE_URL,
+        timeout: float = 10.0,
+        max_retries: int = 3,
+        config: ClientConfig | None = None,
+    ) -> Client:
+        """Build a client that authenticates as a user with ``access_token``.
+
+        Use this (instead of ``client_id``/``client_secret``) to call
+        user-scoped endpoints such as ``events_users.subscribe``. The token is
+        a resource-owner token obtained via the authorization-code flow and is
+        used as-is (not refreshed).
+        """
+        return cls(
+            base_url=base_url,
+            timeout=timeout,
+            max_retries=max_retries,
+            config=config,
+            access_token=access_token,
+        )
 
     @property
     def base_url(self) -> str:
