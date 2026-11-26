@@ -32,6 +32,7 @@ from .models.campus import Campus
 from .models.campus_user import CampusUser
 from .models.cursus import Cursus
 from .models.event import Event
+from .models.event_user import EventUser
 from .models.exam import Exam
 from .models.location import Location
 from .models.project import Project
@@ -48,6 +49,7 @@ __all__ = [
     "CampusUser",
     "Cursus",
     "Event",
+    "EventUser",
     "Exam",
     "Location",
     "Project",

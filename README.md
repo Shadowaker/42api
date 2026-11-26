@@ -83,11 +83,29 @@ and `NetworkError` (connection/timeout failures).
 ## Status
 
 Early-stage: currently covers `users`, `accreditations`, `campuses`,
-`campus_users`, `cursus`, `events`, `exams`, `locations`, `projects`, and
-`projects_users` (`exams`, `locations`, and `projects_users` each include
-their `graph` analytics endpoint). More resources are added incrementally
-on top of the same client/model/query-builder pattern.
-The api with restricted access are not implemented currently.
+`campus_users`, `cursus`, `events`, `events_users`, `exams`, `locations`,
+`projects`, and `projects_users` (`exams`, `locations`, and `projects_users`
+each include their `graph` analytics endpoint). More resources are added
+incrementally on top of the same client/model/query-builder pattern.
+
+`events_users` also exposes the first write endpoints, `subscribe` /
+`unsubscribe` (register a user to an event and cancel it):
+
+```python
+registration = client.events_users.subscribe(event_id=1234, user_id=42)
+client.events_users.unsubscribe(registration.id)
+```
+
+These two calls need a resource-owner (user) token scoped on `profile` — the
+default app-level client-credentials token only grants the read endpoints. Build
+the client from a user token obtained via the authorization-code flow:
+
+```python
+client = Client.from_access_token(user_access_token)  # AsyncClient too
+client.events_users.subscribe(event_id=1234, user_id=42)
+```
+
+The remaining restricted-access APIs are not implemented currently.
 
 ## Development
 
